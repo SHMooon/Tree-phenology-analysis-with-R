@@ -1,4 +1,3 @@
 # Tree-phenology-analysis-with-R
-dd
-dd
-dd
+
+This repository is based on the lecture 'tree phenology analysis with R'
