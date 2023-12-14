@@ -49,6 +49,9 @@ ggplot(data=fixed_gaps,
   ylab("Daily minimum temperature (°C)") +
   geom_line(data=fixed_gaps,aes(DATE,Tmin),col="red",lwd=1.3)
 
+
+
+
 fixed_gaps[,"error"] <- abs(fixed_gaps$Tmin - fixed_gaps$Tmin_observed)
 
 ggplot(data=fixed_gaps,
@@ -100,3 +103,4 @@ patched <- patch_daily_temperatures(weather = Bonn,
 
 write.csv(monthly_bias_fixed$weather,
           "data/Bonn_weather.csv")
+

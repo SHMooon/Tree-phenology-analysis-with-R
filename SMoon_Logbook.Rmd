@@ -78,6 +78,20 @@ Please document all results of the following assignments in your learning logboo
 - 9. Expression of Uncertainties and Errors
 
 # Manual chill analysis
+
+## computing 
+
+```{r include=FALSE}
+library(chillR)
+library(knitr)
+library(pander)
+library(kableExtra)
+library(tidyverse)
+
+```
+
+
+
 ## Exercises on basic chill modeling
 
 Please document all results of the following assignments in your learning logbook.
@@ -169,6 +183,8 @@ kable(head(chill_7_1)) %>%
 
 
 ### Create your own temperature-weighting chill model using the step_model() function
+
+
 ### Run this model on the Winters_hours_gaps dataset using the tempResponse() function.
 
 # Making hourly temperatures
@@ -177,8 +193,85 @@ kable(head(chill_7_1)) %>%
 Please document all results of the following assignments in your learning logbook.
 
 ### Choose a location of interest, find out its latitude and produce plots of daily sunrise, sunset and daylength
+
+```{r include=FALSE}
+require(chillR)
+require(ggplot2)
+require(reshape2)
+
+```
+
+
+```{r}
+Kiel_Days <- daylength(latitude = 54.32, JDay = 1:365)
+
+Kiel_Days_df <-
+  data.frame(
+    JDay = 1:365,
+    Sunrise = Kiel_Days$Sunrise,
+    Sunset = Kiel_Days$Sunset,
+    Daylength = Kiel_Days$Daylength
+  )
+
+Kiel_Days_df <- pivot_longer(Kiel_Days_df,cols=c(Sunrise:Daylength))
+
+ggplot(Kiel_Days_df, aes(JDay, value)) +
+  geom_line(lwd = 1.5) +
+  facet_grid(cols = vars(name)) +
+  ylab("Time of Day / Daylength (Hours)") +
+  theme_bw(base_size = 20)
+
+```
+
+
+ location=c(10.139444, 54.323334),
+                          time_interval=c(1990,2020))
+
 ### Produce an hourly dataset, based on idealized daily curves, for the KA_weather dataset (included in chillR)
+
+```{r}
+require(chillR)
+
+ KA_weather_stacked <- stack_hourly_temps(KA_weather, latitude=54.32)
+
+write.csv(KA_weather_stacked, "data/KA_weather_stacked.csv", row.names = FALSE)
+
+```
+
+```{r, echo=FALSE}
+    require(kableExtra)
+
+    KA_weather_stacked<-read_tab("data/KA_weather_stacked.csv")
+
+    kable(head(KA_weather_stacked)) %>%
+      kable_styling("striped", position = "left",font_size = 10)
+    ```
+
 ### Produce empirical temperature curve parameters for the Winters_hours_gaps dataset, and use them to predict hourly values from daily temperatures (this is very similar to the example above, but please make sure you understand what’s going on)
+
+```{r, eval=FALSE}
+library(chillR)
+library(ggplot2)
+
+coeffs <- Empirical_daily_temperature_curve(Winters_hours_gaps)
+Winters_daily <-
+  make_all_day_table(Winters_hours_gaps, input_timestep = "hour")
+Winters_hours <- Empirical_hourly_temperatures(Winters_daily, coeffs)
+
+
+require(reshape2)
+
+Winters_hours <- Winters_hours[, c("Year", "Month", "Day", "Hour", "Temp")]
+colnames(Winters_hours)[ncol(Winters_hours)] <- "Temp_empirical"
+Winters_ideal <-
+  stack_hourly_temps(Winters_daily, latitude = 38.5)$hourtemps
+Winters_ideal <- Winters_ideal[, c("Year", "Month", "Day", "Hour", "Temp")]
+colnames(Winters_ideal)[ncol(Winters_ideal)] <- "Temp_ideal"
+
+```
+
+
+
 
 #Some useful tools in R
 ## on useful R tools
@@ -230,12 +323,14 @@ Please document all results of the following assignments in your learning logboo
 ### Choose a location of interest and find the 25 closest weather stations using the handle_gsod function
 - Kiel 
 
-```{r}
-Kiel<-handle_gsod(action="list_stations",
-                          location=c(10.139444, 54.323334),
+```{r echo=TRUE}
+Kiel_list<-handle_gsod(action="list_stations",
+                          location=c(10.28, 54.5),
                           time_interval=c(1990,2020))
 
-kable(Kiel) %>%
+require(kableExtra)
+
+kable(Kiel_list) %>%
   kable_styling("striped", position = "left", font_size = 8)
 
 ```
@@ -243,9 +338,11 @@ kable(Kiel) %>%
 ```{r}
 
 weather_Kiel<-handle_gsod(action="download_weather",
-                     location=Kiel$chillR_code[4],
+                     location=Kiel_list$chillR_code[11],
                      time_interval=c(1990,2020))
+```
 
+```{r}
 weather_Kiel[[1]][1:20,]
 
 ```
@@ -257,9 +354,11 @@ weather_Kiel[[1]][1:20,]
 cleaned_weather_Kiel<-handle_gsod(weather_Kiel)
 cleaned_weather_Kiel[[1]][1:20,]
 ```
+
+
 ```{r}
 
-write.csv(Kiel,"data/station_list.csv",row.names=FALSE)
+write.csv(Kiel_list,"data/Kiel_station_list.csv",row.names=FALSE)
 write.csv(weather_Kiel[[1]],"data/Kiel_raw_weather.csv",row.names=FALSE)
 write.csv(cleaned_weather_Kiel[[1]],"data/Kiel_chillR_weather.csv",row.names=FALSE)
 ```
@@ -277,24 +376,31 @@ Please document all results of the following assignments in your learning logboo
 
 You already downloaded some weather data in the exercises for the Getting temperatures lesson. You can keep working with this.
 ```{r}
-Kiel_11<-read.csv("data/Kiel_chillR_weather.csv")
+#from previous data
+Kiel<-read.csv("data/Kiel_chillR_weather.csv")
+```
+
+
+
+### Use chillR functions to find out how many gaps you have in this dataset (even if you have none, please still follow all further steps)
+
+```{r}
+
+#checking for gaps using fix_weather function
+Kiel_QC<-fix_weather(Kiel)$QC
+write.csv(Kiel_QC, "data/Kiel_QC.csv", row.names = FALSE)
+
+
 ```
 
 ```{r}
-Kiel_weather<-Kiel_11[,c("Year","Month", "Day", "Tmax", "Tmin")]
+
+##saving and downloading the needed columns
+Kiel_weather<-Kiel[,c("Year","Month", "Day", "Tmax", "Tmin")]
 kable(Kiel_weather,) %>%
   kable_styling("striped", position = "left", font_size = 10)
 
 write.csv(Kiel_weather, "data/Kiel_weather.csv", row.names = FALSE)
-```
-
-### Use chillR functions to find out how many gaps you have in this dataset (even if you have none, please still follow all further steps)
-checking for gaps using fix_weather function
-```{r}
-Kiel_11_QC<-fix_weather(Kiel_11)$QC
-write.csv(Kiel_11_QC, "data/Kiel_11_QC.csv", row.names = FALSE)
-kable(head(Kiel_11_QC), caption="Quality control summary produced by *fix_weather()*") %>%
-      kable_styling("striped", position = "left", font_size = 10)
 ```
 
 
@@ -302,24 +408,104 @@ kable(head(Kiel_11_QC), caption="Quality control summary produced by *fix_weathe
 ### Create a list of the 25 closest weather stations using the handle_gsod function
 
 ```{r}
-Kiel<-handle_gsod(action="list_stations",
-                          location=c(10.139444, 54.323334),
+Kiel_list<-handle_gsod(action="list_stations",
+                          location=c(10.28, 54.5),
                           time_interval=c(1990,2020))
 
-kable(Kiel) %>%
+kable(Kiel_list) %>%
   kable_styling("striped", position = "left", font_size = 8)
 
 ```
 
+
+
 ### Identify suitable weather stations for patching gaps
+
+I will work with the position 9,14 and 24. 
+
 
 
 ### Download weather data for promising stations, convert them to chillR format and compile them in a list
 
+```{r}
+Kiel_patch_weather<-
+      handle_gsod(action = "download_weather",
+                  location = as.character(Kiel_list$chillR_code[c(9,14,24)]),
+                  time_interval = c(1990,2020)) %>%
+  handle_gsod()
+
+
+```
 
 ### Use the patch_daily_temperatures function to fill gaps
+
+```{r}
+Kiel_patched <- patch_daily_temperatures(weather = Kiel,
+                                    patch_weather = Kiel_patch_weather)
+
+
+save_temperature_scenarios(Kiel_patched,"data/", "Kiel_patched")
+
+#Kiel_patched[[2]]
+
+Kiel_patched$statistics[[1]]
+Kiel_patched$statistics[[2]]
+Kiel_patched$statistics[[3]]
+
+```
+cap the mean_bias at 1 °C and the stdev_bias at 2°C, and then look at the statistics again
+
+```{r}
+Kiel_patched <- patch_daily_temperatures(weather = Kiel,
+                                    patch_weather = Kiel_patch_weather,
+                                    max_mean_bias = 1,
+                                    max_stdev_bias = 2)
+
+save_temperature_scenarios(Kiel_patched,"data/", "Kiel_patched")
+```
+
+
 ### Investigate the results - have all gaps been filled?
+
+```{r}
+
+
+#Summary
+
+#KEGNAES
+Kiel_patched$statistics[[1]]
+#`KIEL (LGT-H/AUT)`
+Kiel_patched$statistics[[2]]
+#`KIEL HOLTENAU`
+Kiel_patched$statistics[[3]]
+
+
+```
+
+
+Also, the record from KEGNAES (Denmark) was rejected, because it didn't pass the stdev_bias filter. 
+The data from Meierwik and Hohn are pretty gut. By the Data from Meierwik,I was able to filled no gaps for Tmin and 57 gaps for Tmax. There were 54 gaps remain for Tmin and 14 for Tmax, respectively. By the data from Hohn, I was able to filled 42 gaps for Tmin and 1 for Tmax. There were 12 gaps remain for Tmin and 13 for Tmax. 
+
+
+
+
 ### If necessary, repeat until you have a dataset you can work with in further analyses
+
+```{r}
+Kiel_post_patch_stats <- fix_weather(Kiel_patched)$QC
+
+Kiel_post_patch_stats
+
+ write.csv(Kiel_post_patch_stats, "data/Kiel_post_patch_stats.csv", row.names = FALSE)
+
+```
+
+There are two days missing after the patching. It seems safe to use linear interpolation for such a short gap. 
+
+```{r}
+Kiel_weather2<-fix_weather(Kiel_patched)
+
+```
 
 # Generating temperature scenarios
 - wather generator: random data (like a dice) from a virtual collection
@@ -328,7 +514,7 @@ kable(Kiel) %>%
 - RMAWAGEN: little complicate, but after few day using, then it works good. 
 
 if generator not work then we need to install old one. 
-
+- How to use weather generator 
 ## Exercises on temperature generation
 
 Please document all results of the following assignments in your learning logbook.
@@ -337,3 +523,41 @@ Please document all results of the following assignments in your learning logboo
 ### Calculate winter chill (in Chill Portions) for your synthetic weather, and illustrate your results as histograms and cumulative distributions.
 ### Produce similar plots for the number of freezing hours (<0°C) in April (or October, if your site is in the Southern Hemisphere) for your location of interest.
 check lecture 7 to change it.
+
+# Saving and loading data (and hiding this in markdown)
+## Exercises on saving and loading data
+
+We don’t have to do any exercises on this, but make sure you apply this in your learning logbook. Otherwise the lessons of the next few sessions will make it very difficult to work with the markdown file.
+
+# historic temperature scenarios
+## Exercises on generating historic temperature scenarios
+
+Please document all results of the following assignments in your learning logbook.
+
+### For the location you chose for previous exercises, produce historic temperature scenarios representing several years of the historic record (your choice).
+
+### Produce chill distributions for these scenarios and plot them.
+
+# future temperature scenarios
+## Exercises on generating future temperature scenarios
+
+Please document all results of the following assignments in your learning logbook.
+
+### Analyze the historic and future impact of climate change on three agroclimatic metrics of your choice, for the location you’ve chosen for your earlier analyses.
+
+
+# future temperature scenarios
+
+CMIP6: lastly updated
+- they are came from  scenarios contained in the Special Report on Emission Scenarios (SRES) (2000): used not that much anymore 
+- Representative Concentration Pathways (RCPs): currently recommended, technically used 
+- Shared Socioeconomic Pathways (SSPs). (2021): Eike use this 
+
+
+
+## Exercises on future temperature scenarios
+
+Please document all results of the following assignments in your learning logbook.
+
+### Briefly describe the differences between the RCPs and the SSPs (you may have to follow some of the links provided above). 
+- briefly... 

@@ -1764,7 +1764,7 @@ affects our climate.</h3>
 <li>Greenhouse Gas Emissions</li>
 <li>Aerosols and Particulate Matte</li>
 <li>Ozone Depletion</li>
-<li><h2 id="solar-variability">Solar Variability</h2></li>
+<li>Solar Variability</li>
 </ul>
 </div>
 <div id="explain-briefly-what-is-special-about-temperature-dynamics-of-recent-decades-and-why-we-have-good-reasons-to-be-concerned." class="section level3" number="4.1.2">
@@ -1846,13 +1846,344 @@ projections.</h3>
 <div id="manual-chill-analysis" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> Manual chill
 analysis</h1>
-<div id="exercises-on-basic-chill-modeling" class="section level2" number="6.1">
-<h2><span class="header-section-number">6.1</span> Exercises on basic
+<div id="computing" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> computing</h2>
+<pre class="r"><code>library(chillR)
+library(knitr)
+library(pander)
+library(kableExtra)
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.2     ✔ readr     2.1.4
+## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+## ✔ purrr     1.0.1     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter()        masks stats::filter()
+## ✖ dplyr::group_rows()    masks kableExtra::group_rows()
+## ✖ dplyr::lag()           masks stats::lag()
+## ✖ lubridate::leap_year() masks chillR::leap_year()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>kable(Winters_hours_gaps[1:10,])  %&gt;%
+  kable_styling(&quot;striped&quot;, position = &quot;left&quot;,font_size = 10)</code></pre>
+<table class="table table-striped" style="font-size: 10px; ">
+<thead>
+<tr>
+<th style="text-align:right;">
+Year
+</th>
+<th style="text-align:right;">
+Month
+</th>
+<th style="text-align:right;">
+Day
+</th>
+<th style="text-align:right;">
+Hour
+</th>
+<th style="text-align:right;">
+Temp_gaps
+</th>
+<th style="text-align:right;">
+Temp
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+15.127
+</td>
+<td style="text-align:right;">
+15.127
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+17.153
+</td>
+<td style="text-align:right;">
+17.153
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+18.699
+</td>
+<td style="text-align:right;">
+18.699
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+18.699
+</td>
+<td style="text-align:right;">
+18.699
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+18.842
+</td>
+<td style="text-align:right;">
+18.842
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+19.508
+</td>
+<td style="text-align:right;">
+19.508
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+19.318
+</td>
+<td style="text-align:right;">
+19.318
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+17.701
+</td>
+<td style="text-align:right;">
+17.701
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+15.414
+</td>
+<td style="text-align:right;">
+15.414
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+12.727
+</td>
+<td style="text-align:right;">
+12.727
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>hourtemps&lt;-Winters_hours_gaps[,c(&quot;Year&quot;,&quot;Month&quot;,&quot;Day&quot;,&quot;Hour&quot;,&quot;Temp&quot;)]
+hourtemps[3,]</code></pre>
+<pre><code>##   Year Month Day Hour   Temp
+## 3 2008     3   3   12 18.699</code></pre>
+<pre class="r"><code>hourtemps[3,&quot;Temp&quot;]</code></pre>
+<pre><code>## [1] 18.699</code></pre>
+<pre class="r"><code>hourtemps$Temp[1:5]</code></pre>
+<pre><code>## [1] 15.127 17.153 18.699 18.699 18.842</code></pre>
+<pre class="r"><code>hourtemps[1:5,]</code></pre>
+<pre><code>##   Year Month Day Hour   Temp
+## 1 2008     3   3   10 15.127
+## 2 2008     3   3   11 17.153
+## 3 2008     3   3   12 18.699
+## 4 2008     3   3   13 18.699
+## 5 2008     3   3   14 18.842</code></pre>
+<pre class="r"><code>hourtemps[,&quot;Chilling_Hour&quot;]&lt;-hourtemps$Temp&gt;=0&amp;hourtemps$Temp&lt;=7.2
+
+hourtemps[13:20,]</code></pre>
+<pre><code>##    Year Month Day Hour  Temp Chilling_Hour
+## 13 2008     3   3   22 9.040         FALSE
+## 14 2008     3   3   23 7.920         FALSE
+## 15 2008     3   4    0 6.535          TRUE
+## 16 2008     3   4    1 6.687          TRUE
+## 17 2008     3   4    2 8.767         FALSE
+## 18 2008     3   4    3 9.139         FALSE
+## 19 2008     3   4    4 6.788          TRUE
+## 20 2008     3   4    5 5.076          TRUE</code></pre>
+<pre class="r"><code>sum(hourtemps$Chilling_Hour[13:20])</code></pre>
+<pre><code>## [1] 4</code></pre>
+<pre class="r"><code>Start_Date&lt;-which(hourtemps$Year==2008 &amp;
+                  hourtemps$Month==10 &amp;
+                  hourtemps$Day==1 &amp; 
+                  hourtemps$Hour==12)
+End_Date&lt;-which(hourtemps$Year==2008 &amp;
+                hourtemps$Month==10 &amp;
+                hourtemps$Day==31 &amp;
+                hourtemps$Hour==12)
+
+sum(hourtemps$Chilling_Hour[Start_Date:End_Date])</code></pre>
+<pre><code>## [1] 28</code></pre>
+<pre class="r"><code>CH&lt;-function(hourtemps)
+{
+  hourtemps[,&quot;Chilling_Hour&quot;]&lt;-hourtemps$Temp&gt;=0&amp;hourtemps$Temp&lt;=7.2
+  return(hourtemps)
+}
+
+CH(hourtemps)[13:20,]  # again restricted to rows 13-20,</code></pre>
+<pre><code>##    Year Month Day Hour  Temp Chilling_Hour
+## 13 2008     3   3   22 9.040         FALSE
+## 14 2008     3   3   23 7.920         FALSE
+## 15 2008     3   4    0 6.535          TRUE
+## 16 2008     3   4    1 6.687          TRUE
+## 17 2008     3   4    2 8.767         FALSE
+## 18 2008     3   4    3 9.139         FALSE
+## 19 2008     3   4    4 6.788          TRUE
+## 20 2008     3   4    5 5.076          TRUE</code></pre>
+<pre class="r"><code>sum_CH&lt;-function(hourtemps, Start_YEARMODA, End_YEARMODA)
+{
+  Start_Year&lt;-trunc(Start_YEARMODA/10000) # &quot;trunc&quot; removes all decimals
+  Start_Month&lt;-trunc((Start_YEARMODA-Start_Year*10000)/100)
+  Start_Day&lt;-Start_YEARMODA-Start_Year*10000-Start_Month*100
+  Start_Hour&lt;-12 # This could also be flexible, but let&#39;s skip this for now
+  End_Year&lt;-trunc(End_YEARMODA/10000)
+  End_Month&lt;-trunc((End_YEARMODA-End_Year*10000)/100)
+  End_Day&lt;-End_YEARMODA-End_Year*10000-End_Month*100
+  End_Hour&lt;-12 # This could also be flexible, but let&#39;s skip this for now
+
+  Start_Date&lt;-which(hourtemps$Year==Start_Year &amp;
+                    hourtemps$Month==Start_Month &amp;
+                    hourtemps$Day==Start_Day &amp;
+                    hourtemps$Hour==Start_Hour)
+  End_Date&lt;-which(hourtemps$Year==End_Year &amp;
+                  hourtemps$Month==End_Month &amp;
+                  hourtemps$Day==End_Day &amp;
+                  hourtemps$Hour==End_Hour)
+
+  Chill_hours&lt;-CH(hourtemps)
+  
+  return(sum(Chill_hours$Chilling_Hour[Start_Date:End_Date]))
+
+}
+sum_CH(hourtemps,20080401,20081011)</code></pre>
+<pre><code>## [1] 77</code></pre>
+</div>
+<div id="exercises-on-basic-chill-modeling" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Exercises on basic
 chill modeling</h2>
 <p>Please document all results of the following assignments in your
 learning logbook.</p>
-<div id="write-a-basic-function-that-calculates-warm-hours-25c" class="section level3" number="6.1.1">
-<h3><span class="header-section-number">6.1.1</span> Write a basic
+<div id="write-a-basic-function-that-calculates-warm-hours-25c" class="section level3" number="6.2.1">
+<h3><span class="header-section-number">6.2.1</span> Write a basic
 function that calculates warm hours (&gt;25°C)</h3>
 <pre class="r"><code>Year&lt;-c(2000:2010)
 Temps&lt;-c(20:30)
@@ -1953,8 +2284,8 @@ FALSE
 </tbody>
 </table>
 </div>
-<div id="apply-this-function-to-the-winters_hours_gaps-dataset" class="section level3" number="6.1.2">
-<h3><span class="header-section-number">6.1.2</span> Apply this function
+<div id="apply-this-function-to-the-winters_hours_gaps-dataset" class="section level3" number="6.2.2">
+<h3><span class="header-section-number">6.2.2</span> Apply this function
 to the Winters_hours_gaps dataset</h3>
 <pre class="r"><code>hourtemps&lt;- Winters_hours_gaps[,c(&quot;Year&quot;, &quot;Month&quot;, &quot;Day&quot;, &quot;Hour&quot;, &quot;Temp&quot;)]
 
@@ -2113,8 +2444,8 @@ NA
 </tbody>
 </table>
 </div>
-<div id="extend-this-function-so-that-it-can-take-start-and-end-dates-as-inputs-and-sums-up-warm-hours-between-these-dates" class="section level3" number="6.1.3">
-<h3><span class="header-section-number">6.1.3</span> Extend this
+<div id="extend-this-function-so-that-it-can-take-start-and-end-dates-as-inputs-and-sums-up-warm-hours-between-these-dates" class="section level3" number="6.2.3">
+<h3><span class="header-section-number">6.2.3</span> Extend this
 function, so that it can take start and end dates as inputs and sums up
 warm hours between these dates</h3>
 </div>
@@ -2266,6 +2597,36 @@ elegant and easier - and possibly even more fun!</li>
 <div id="some-useful-tools-in-r" class="section level1" number="9">
 <h1><span class="header-section-number">9</span> Some useful tools in
 R</h1>
+<div id="exercises-on-useful-r-tools" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Exercises on useful R
+tools</h2>
+<p>Please document all results of the following assignments in your
+learning logbook.</p>
+<div id="based-on-the-winters_hours_gaps-dataset-use-magrittr-pipes-and-functions-of-the-tidyverse-to-accomplish-the-following-1" class="section level3" number="9.1.1">
+<h3><span class="header-section-number">9.1.1</span> Based on the
+Winters_hours_gaps dataset, use magrittr pipes and functions of the
+tidyverse to accomplish the following:</h3>
+<ul>
+<li>Convert the dataset into a tibble</li>
+<li>Select only the top 10 rows of the dataset</li>
+<li>Convert the tibble to a long format, with separate rows for
+Temp_gaps and Temp</li>
+<li>Use ggplot2 to plot Temp_gaps and Temp as facets (point or line
+plot)</li>
+<li>Convert the dataset back to the wide format</li>
+<li>Select only the following columns: Year, Month, Day and Temp</li>
+<li>Sort the dataset by the Temp column, in descending order ### For the
+Winter_hours_gaps dataset, write a for loop to convert all temperatures
+(Temp column) to degrees Fahrenheit ### Execute the same operation with
+a function from the apply family ### Now use the tidyverse function
+mutate to achieve the same outcome ### Voluntary: consider taking a look
+at the instruction materials on all these functions, which I linked
+above, as well as at other sources on the internet. There’s a lot more
+to discover here, with lots of potential for making your coding more
+elegant and easier - and possibly even more fun!</li>
+</ul>
+</div>
+</div>
 </div>
 <div id="getting-temperature-data" class="section level1" number="10">
 <h1><span class="header-section-number">10</span> Getting temperature
@@ -2507,7 +2868,7 @@ GM
 20081231
 </td>
 <td style="text-align:right;">
-22.16
+22.15
 </td>
 <td style="text-align:right;">
 7.49
@@ -2603,7 +2964,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-39.16
+39.07
 </td>
 <td style="text-align:right;">
 31.00
@@ -2635,7 +2996,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-43.22
+43.14
 </td>
 <td style="text-align:right;">
 31.00
@@ -2667,7 +3028,7 @@ GM
 20030816
 </td>
 <td style="text-align:right;">
-44.81
+44.74
 </td>
 <td style="text-align:right;">
 13.62
@@ -2699,7 +3060,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-53.23
+53.18
 </td>
 <td style="text-align:right;">
 8.00
@@ -2731,7 +3092,7 @@ GM
 20030816
 </td>
 <td style="text-align:right;">
-55.41
+55.32
 </td>
 <td style="text-align:right;">
 13.62
@@ -2795,7 +3156,7 @@ DA
 19910331
 </td>
 <td style="text-align:right;">
-59.63
+59.58
 </td>
 <td style="text-align:right;">
 1.25
@@ -2827,7 +3188,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-61.43
+61.34
 </td>
 <td style="text-align:right;">
 8.00
@@ -2859,7 +3220,7 @@ GM
 19830509
 </td>
 <td style="text-align:right;">
-64.08
+63.95
 </td>
 <td style="text-align:right;">
 0.00
@@ -2891,7 +3252,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-64.56
+64.44
 </td>
 <td style="text-align:right;">
 1.33
@@ -2923,7 +3284,7 @@ GM
 19921231
 </td>
 <td style="text-align:right;">
-67.75
+67.62
 </td>
 <td style="text-align:right;">
 3.00
@@ -2987,7 +3348,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-69.05
+69.02
 </td>
 <td style="text-align:right;">
 31.00
@@ -3019,7 +3380,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-70.20
+70.15
 </td>
 <td style="text-align:right;">
 31.00
@@ -3051,7 +3412,7 @@ GM
 19921231
 </td>
 <td style="text-align:right;">
-72.67
+72.53
 </td>
 <td style="text-align:right;">
 3.00
@@ -3083,7 +3444,7 @@ GM
 19730601
 </td>
 <td style="text-align:right;">
-73.67
+73.53
 </td>
 <td style="text-align:right;">
 0.00
@@ -3115,7 +3476,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-73.67
+73.53
 </td>
 <td style="text-align:right;">
 8.00
@@ -28508,7 +28869,7 @@ GM
 20081231
 </td>
 <td style="text-align:right;">
-22.16
+22.15
 </td>
 <td style="text-align:right;">
 7.49
@@ -28604,7 +28965,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-39.16
+39.07
 </td>
 <td style="text-align:right;">
 31.00
@@ -28636,7 +28997,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-43.22
+43.14
 </td>
 <td style="text-align:right;">
 31.00
@@ -28668,7 +29029,7 @@ GM
 20030816
 </td>
 <td style="text-align:right;">
-44.81
+44.74
 </td>
 <td style="text-align:right;">
 13.62
@@ -28700,7 +29061,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-53.23
+53.18
 </td>
 <td style="text-align:right;">
 8.00
@@ -28732,7 +29093,7 @@ GM
 20030816
 </td>
 <td style="text-align:right;">
-55.41
+55.32
 </td>
 <td style="text-align:right;">
 13.62
@@ -28796,7 +29157,7 @@ DA
 19910331
 </td>
 <td style="text-align:right;">
-59.63
+59.58
 </td>
 <td style="text-align:right;">
 1.25
@@ -28828,7 +29189,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-61.43
+61.34
 </td>
 <td style="text-align:right;">
 8.00
@@ -28860,7 +29221,7 @@ GM
 19830509
 </td>
 <td style="text-align:right;">
-64.08
+63.95
 </td>
 <td style="text-align:right;">
 0.00
@@ -28892,7 +29253,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-64.56
+64.44
 </td>
 <td style="text-align:right;">
 1.33
@@ -28924,7 +29285,7 @@ GM
 19921231
 </td>
 <td style="text-align:right;">
-67.75
+67.62
 </td>
 <td style="text-align:right;">
 3.00
@@ -28988,7 +29349,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-69.05
+69.02
 </td>
 <td style="text-align:right;">
 31.00
@@ -29020,7 +29381,7 @@ GM
 20231111
 </td>
 <td style="text-align:right;">
-70.20
+70.15
 </td>
 <td style="text-align:right;">
 31.00
@@ -29052,7 +29413,7 @@ GM
 19921231
 </td>
 <td style="text-align:right;">
-72.67
+72.53
 </td>
 <td style="text-align:right;">
 3.00
@@ -29084,7 +29445,7 @@ GM
 19730601
 </td>
 <td style="text-align:right;">
-73.67
+73.53
 </td>
 <td style="text-align:right;">
 0.00
@@ -29116,7 +29477,7 @@ GM
 19971231
 </td>
 <td style="text-align:right;">
-73.67
+73.53
 </td>
 <td style="text-align:right;">
 8.00
@@ -29163,28 +29524,94 @@ collection</li>
 <li>RMAWAGEN: little complicate, but after few day using, then it works
 good.</li>
 </ul>
-<p>if generator not work then we need to install old one.</p>
-<div id="exercises-on-temperature-generation" class="section level2" number="12.1">
-<h2><span class="header-section-number">12.1</span> Exercises on
-temperature generation</h2>
+<p>if generator not work then we need to install old one. - How to use
+weather generator ## Exercises on temperature generation</p>
 <p>Please document all results of the following assignments in your
 learning logbook.</p>
-<div id="for-the-location-you-chose-for-your-earlier-analyses-use-chillrs-weather-generator-to-produce-100-years-of-synthetic-temperature-data." class="section level3" number="12.1.1">
-<h3><span class="header-section-number">12.1.1</span> For the location
+<div id="for-the-location-you-chose-for-your-earlier-analyses-use-chillrs-weather-generator-to-produce-100-years-of-synthetic-temperature-data." class="section level3" number="12.0.1">
+<h3><span class="header-section-number">12.0.1</span> For the location
 you chose for your earlier analyses, use chillR’s weather generator to
 produce 100 years of synthetic temperature data.</h3>
 </div>
-<div id="calculate-winter-chill-in-chill-portions-for-your-synthetic-weather-and-illustrate-your-results-as-histograms-and-cumulative-distributions." class="section level3" number="12.1.2">
-<h3><span class="header-section-number">12.1.2</span> Calculate winter
+<div id="calculate-winter-chill-in-chill-portions-for-your-synthetic-weather-and-illustrate-your-results-as-histograms-and-cumulative-distributions." class="section level3" number="12.0.2">
+<h3><span class="header-section-number">12.0.2</span> Calculate winter
 chill (in Chill Portions) for your synthetic weather, and illustrate
 your results as histograms and cumulative distributions.</h3>
 </div>
-<div id="produce-similar-plots-for-the-number-of-freezing-hours-0c-in-april-or-october-if-your-site-is-in-the-southern-hemisphere-for-your-location-of-interest." class="section level3" number="12.1.3">
-<h3><span class="header-section-number">12.1.3</span> Produce similar
+<div id="produce-similar-plots-for-the-number-of-freezing-hours-0c-in-april-or-october-if-your-site-is-in-the-southern-hemisphere-for-your-location-of-interest." class="section level3" number="12.0.3">
+<h3><span class="header-section-number">12.0.3</span> Produce similar
 plots for the number of freezing hours (&lt;0°C) in April (or October,
 if your site is in the Southern Hemisphere) for your location of
 interest.</h3>
 <p>check lecture 7 to change it.</p>
+</div>
+</div>
+<div id="saving-and-loading-data-and-hiding-this-in-markdown" class="section level1" number="13">
+<h1><span class="header-section-number">13</span> Saving and loading
+data (and hiding this in markdown)</h1>
+<div id="exercises-on-saving-and-loading-data" class="section level2" number="13.1">
+<h2><span class="header-section-number">13.1</span> Exercises on saving
+and loading data</h2>
+<p>We don’t have to do any exercises on this, but make sure you apply
+this in your learning logbook. Otherwise the lessons of the next few
+sessions will make it very difficult to work with the markdown file.</p>
+</div>
+</div>
+<div id="historic-temperature-scenarios" class="section level1" number="14">
+<h1><span class="header-section-number">14</span> historic temperature
+scenarios</h1>
+<div id="exercises-on-generating-historic-temperature-scenarios" class="section level2" number="14.1">
+<h2><span class="header-section-number">14.1</span> Exercises on
+generating historic temperature scenarios</h2>
+<p>Please document all results of the following assignments in your
+learning logbook.</p>
+<div id="for-the-location-you-chose-for-previous-exercises-produce-historic-temperature-scenarios-representing-several-years-of-the-historic-record-your-choice." class="section level3" number="14.1.1">
+<h3><span class="header-section-number">14.1.1</span> For the location
+you chose for previous exercises, produce historic temperature scenarios
+representing several years of the historic record (your choice).</h3>
+</div>
+<div id="produce-chill-distributions-for-these-scenarios-and-plot-them." class="section level3" number="14.1.2">
+<h3><span class="header-section-number">14.1.2</span> Produce chill
+distributions for these scenarios and plot them.</h3>
+</div>
+</div>
+</div>
+<div id="future-temperature-scenarios" class="section level1" number="15">
+<h1><span class="header-section-number">15</span> future temperature
+scenarios</h1>
+<div id="exercises-on-generating-future-temperature-scenarios" class="section level2" number="15.1">
+<h2><span class="header-section-number">15.1</span> Exercises on
+generating future temperature scenarios</h2>
+<p>Please document all results of the following assignments in your
+learning logbook.</p>
+<div id="analyze-the-historic-and-future-impact-of-climate-change-on-three-agroclimatic-metrics-of-your-choice-for-the-location-youve-chosen-for-your-earlier-analyses." class="section level3" number="15.1.1">
+<h3><span class="header-section-number">15.1.1</span> Analyze the
+historic and future impact of climate change on three agroclimatic
+metrics of your choice, for the location you’ve chosen for your earlier
+analyses.</h3>
+</div>
+</div>
+</div>
+<div id="future-temperature-scenarios-1" class="section level1" number="16">
+<h1><span class="header-section-number">16</span> future temperature
+scenarios</h1>
+<p>CMIP6: lastly updated - they are came from scenarios contained in the
+Special Report on Emission Scenarios (SRES) (2000): used not that much
+anymore - Representative Concentration Pathways (RCPs): currently
+recommended, technically used - Shared Socioeconomic Pathways (SSPs).
+(2021): Eike use this</p>
+<div id="exercises-on-future-temperature-scenarios" class="section level2" number="16.1">
+<h2><span class="header-section-number">16.1</span> Exercises on future
+temperature scenarios</h2>
+<p>Please document all results of the following assignments in your
+learning logbook.</p>
+<div id="briefly-describe-the-differences-between-the-rcps-and-the-ssps-you-may-have-to-follow-some-of-the-links-provided-above." class="section level3" number="16.1.1">
+<h3><span class="header-section-number">16.1.1</span> Briefly describe
+the differences between the RCPs and the SSPs (you may have to follow
+some of the links provided above).</h3>
+<ul>
+<li>briefly…</li>
+</ul>
 </div>
 </div>
 </div>
