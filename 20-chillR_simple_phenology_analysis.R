@@ -17,7 +17,7 @@ Alex %>% download_this(
 
 
 
-Alex <- read.csv("data/Alexander_Lucas_bloom_1958_2019.csv")
+Alex <- read.csv("data/Alexander_Lucas_bloom_1958_2019.csv", sep = ";")
 
 Alex <- pivot_longer(Alex,
                      cols = c(First_bloom:Last_bloom),
@@ -72,7 +72,13 @@ ggplot(Alex_first,
   xlab ("Year") +
   theme_bw(base_size = 15)
 
-temperature <- read.csv("data/TMaxTMin1958-2019_patched.csv")
+# Temperature correlations
+
+  #figure out a transition (chilling & heat) from the data
+
+temperature <- read.csv("data/TMaxTMin1958-2019_patched.csv", sep = ";")
+
+
 
 Tmin <- temperature %>%
   group_by(Year) %>%
