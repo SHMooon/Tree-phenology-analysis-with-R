@@ -78,7 +78,7 @@ Please document all results of the following assignments in your learning logboo
 - 9. Expression of Uncertainties and Errors
 
 # Manual chill analysis
-
+chilling period: end of dormancy 
 ## computing 
 
 ```{r include=FALSE}
@@ -338,7 +338,7 @@ kable(Kiel_list) %>%
 ```{r}
 
 weather_Kiel<-handle_gsod(action="download_weather",
-                     location=Kiel_list$chillR_code[11],
+                     location=Kiel_list$chillR_code[9],
                      time_interval=c(1990,2020))
 ```
 
@@ -404,6 +404,22 @@ write.csv(Kiel_weather, "data/Kiel_weather.csv", row.names = FALSE)
 ```
 
 
+```{r, echo=FALSE}
+    Kiel_QC<-read_tab("data/Kiel_QC.csv")
+
+    kable(head(Kiel_QC), caption="Quality control summary produced by *fix_weather()*") %>%
+      kable_styling("striped", position = "left", font_size = 10)
+```
+
+
+```{r, echo=FALSE}
+    library(kableExtra)
+    Kiel_weather<-read_tab("data/Kiel_weather.csv")
+
+    kable(head(Kiel_weather)) %>%
+      kable_styling("striped", position = "left", font_size = 10)
+    ```
+
 
 ### Create a list of the 25 closest weather stations using the handle_gsod function
 
@@ -430,7 +446,7 @@ I will work with the position 9,14 and 24.
 ```{r}
 Kiel_patch_weather<-
       handle_gsod(action = "download_weather",
-                  location = as.character(Kiel_list$chillR_code[c(9,14,24)]),
+                  location = as.character(Kiel_list$chillR_code[c(10,14,24)]),
                   time_interval = c(1990,2020)) %>%
   handle_gsod()
 
@@ -453,39 +469,35 @@ Kiel_patched$statistics[[2]]
 Kiel_patched$statistics[[3]]
 
 ```
-cap the mean_bias at 1 °C and the stdev_bias at 2°C, and then look at the statistics again
+the Data from all positions look good. 
+So it is not necessary to cap the mean_bias at 1 °C and the stdev_bias at 2°C.
+By the data from Schleswig, 44 gaps for Tmin and 57 gaps for Tmax were able to be filled. There were 10 gaps remain for Tmin and 14 gaps remain. By the Data from Meierwik,I was able to filled no gaps for Tmin and 57 gaps for Tmax. There were 54 gaps remain for Tmin and 14 for Tmax, respectively. By the data from Hohn, I was able to filled 42 gaps for Tmin and 1 for Tmax. There were 12 gaps remain for Tmin and 13 for Tmax.
 
-```{r}
-Kiel_patched <- patch_daily_temperatures(weather = Kiel,
-                                    patch_weather = Kiel_patch_weather,
-                                    max_mean_bias = 1,
-                                    max_stdev_bias = 2)
 
-save_temperature_scenarios(Kiel_patched,"data/", "Kiel_patched")
-```
 
 
 ### Investigate the results - have all gaps been filled?
 
-```{r}
+```{r, eval=FALSE}
+    library(chillR)
 
+    patched<-read.csv("data/Kiel_patched_1_weather.csv")
 
-#Summary
+    post_patch_stats<-fix_weather(patched)$QC
 
-#KEGNAES
-Kiel_patched$statistics[[1]]
-#`KIEL (LGT-H/AUT)`
-Kiel_patched$statistics[[2]]
-#`KIEL HOLTENAU`
-Kiel_patched$statistics[[3]]
-
-
+    write.csv(post_patch_stats, "data/Kiel_post_patchstats.csv", row.names = FALSE)
 ```
 
+    ```{r, echo=FALSE}
+    library(kableExtra)
 
-Also, the record from KEGNAES (Denmark) was rejected, because it didn't pass the stdev_bias filter. 
-The data from Meierwik and Hohn are pretty gut. By the Data from Meierwik,I was able to filled no gaps for Tmin and 57 gaps for Tmax. There were 54 gaps remain for Tmin and 14 for Tmax, respectively. By the data from Hohn, I was able to filled 42 gaps for Tmin and 1 for Tmax. There were 12 gaps remain for Tmin and 13 for Tmax. 
+    post_patch_stats<-read_tab("data/Kiel_post_patchstats.csv")
 
+    kable(post_patch_stats,) %>%
+      kable_styling("striped", position = "left", font_size = 10)
+    ```
+ 
+There are 5 days missing after the patching. It seems safe to use linear interpolation for such a short gap.
 
 
 
@@ -500,10 +512,20 @@ Kiel_post_patch_stats
 
 ```
 
-There are two days missing after the patching. It seems safe to use linear interpolation for such a short gap. 
+ 
 
 ```{r}
 Kiel_weather2<-fix_weather(Kiel_patched)
+
+write.csv(Kiel_weather2$weather, "data/Kiel_patched2.csv", row.names = FALSE)
+
+Kiel_weather<-Kiel_weather2$weather[c("Year","Month", "Day", "Tmin", "Tmax")]
+kable(Kiel_weather,) %>%
+  kable_styling("striped", position = "left", font_size = 10)
+
+Kiel_weather <- round(Kiel_weather, digits = 1)
+
+write.csv(Kiel_weather, "data/Kiel_weather.csv", row.names = FALSE)
 
 ```
 
@@ -520,9 +542,44 @@ if generator not work then we need to install old one.
 Please document all results of the following assignments in your learning logbook.
 
 ### For the location you chose for your earlier analyses, use chillR’s weather generator to produce 100 years of synthetic temperature data.
+
+The location where I choose is c(10.28, 54.5) 
+
+```{r}
+library(chillR)
+library(RMAWGEN)
+library(ggplot2)
+#from the fixed weather
+Kiel_weather<-read.csv("data/Kiel_weather.csv")
+
+Kiel_weather <- round(Kiel_weather, digits = 1)
+
+Temp <- temperature_generation(Kiel_weather,
+                         years=c(1998,2005),
+                         sim_years = c(2001,2100))
+
+Temperatures<-cbind(Kiel_weather[
+       which(Kiel_weather$Year %in% 1998:2005),] ,Data_source="observed")
+     
+Temperatures<-rbind(Temperatures,
+                         cbind(Temp[[1]][,c("Year","Month","Day","Tmin","Tmax")],
+                               Data_source="simulated"))
+
+Temperatures[,"Date"]<-as.Date(ISOdate(2000, Temperatures$Month, Temperatures$Day))
+
+```
+
+
+
 ### Calculate winter chill (in Chill Portions) for your synthetic weather, and illustrate your results as histograms and cumulative distributions.
+
+
+
+
 ### Produce similar plots for the number of freezing hours (<0°C) in April (or October, if your site is in the Southern Hemisphere) for your location of interest.
 check lecture 7 to change it.
+
+
 
 # Saving and loading data (and hiding this in markdown)
 ## Exercises on saving and loading data
@@ -561,3 +618,23 @@ Please document all results of the following assignments in your learning logboo
 
 ### Briefly describe the differences between the RCPs and the SSPs (you may have to follow some of the links provided above). 
 - briefly... 
+
+# Making CMPI6 scenario
+
+# Making CMPI5 scenario (we didn't do it)
+
+# Plotting uture scenario 
+
+# Chill model comparison
+
+# Simple phenology analysis 
+
+# Delineating temperature response phases with PLS regression
+
+- PLS (projection to latent structures): the damage level is correlated with the reflection. 
+- 21.3: correlation with a flowering. higher temp earlier blooming date. 
+- approx method. 
+- the dataset from defferent cultivars show the same patterns
+- with datasets, we don't have to visit in orchard. but modeling... 
+- Important: always keep in mind that we’re using PLS with a very small dataset and we should not place too much emphasis on individual characteristics of the emerging model coefficient patterns#
+

@@ -1,13 +1,15 @@
 library(chillR)
 library(tidyverse)
+library(dplyr)
+
 
 Alex_first <- read_tab("data/Alexander_Lucas_bloom_1958_2019.csv") %>%
   select(Pheno_year, First_bloom) %>%
-  mutate(Year = as.numeric(substr(First_bloom, 1, 4)),
+  mutate(Year = as.numeric(substr(First_bloom, 1, 4)), #first 4 symbols
          Month = as.numeric(substr(First_bloom, 5, 6)),
          Day = as.numeric(substr(First_bloom, 7, 8))) %>%
   make_JDay() %>%
-  select(Pheno_year, JDay) %>%
+  select(Pheno_year,JDay) %>%
   rename(Year = Pheno_year,
          pheno = JDay)
 
