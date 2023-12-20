@@ -73,7 +73,7 @@ coeff_plot <- ggplot(PLS_gg,
                      aes(x = Date,
                          y = Coef)) +
   geom_bar(stat ='identity',
-           aes(fill = VIP_Coeff)) +
+           aes(fill = VIP_importance)) +
   scale_fill_manual(name = "Effect direction", 
                     labels = c("Advancing",
                                "Unimportant",
@@ -124,6 +124,9 @@ plot<- (VIP_plot +
 plot
 
 
+
+#with a function "PLS_results" is a only input and copy all the code inside to making a combined plot
+
 ggplot_PLS <- function(PLS_results)
 {
   library(ggplot2)
@@ -146,7 +149,7 @@ ggplot_PLS <- function(PLS_results)
            VIP_Coeff = factor(sign(Coef) * VIP_importance))
   
   VIP_plot<- ggplot(PLS_gg,aes(x=Date,y=VIP)) +
-    geom_bar(stat='identity',aes(fill=VIP>0.8))
+    geom_bar(stat='identity',aes(fill=VIP>0.8)) 
   
   VIP_plot <- VIP_plot +
     scale_fill_manual(name="VIP", 
@@ -175,19 +178,23 @@ ggplot_PLS <- function(PLS_results)
           axis.ticks.x = element_blank(),
           axis.title.x = element_blank())
   
+  
   temp_plot <- ggplot(PLS_gg) +
+    #ribbon: different starting as bar plot like from upper side. 
     geom_ribbon(aes(x = Date,
                     ymin = Tmean - Tstdev,
                     ymax = Tmean + Tstdev),
                 fill = "grey") +
+    #two more rebbon
     geom_ribbon(aes(x = Date,
-                    ymin = Tmean - Tstdev * (VIP_Coeff == -1),
-                    ymax = Tmean + Tstdev * (VIP_Coeff == -1)),
+                    ymin = Tmean - Tstdev * (VIP_Coeff == -1), #if coeff = -1: lower part of ribbon
+                    ymax = Tmean + Tstdev * (VIP_Coeff == -1)), #upper part of ribbon
                 fill = "red") +
     geom_ribbon(aes(x = Date,
-                    ymin = Tmean - Tstdev * (VIP_Coeff == 1),
+                    ymin = Tmean - Tstdev * (VIP_Coeff == 1), # if coecc = 1
                     ymax = Tmean + Tstdev * (VIP_Coeff == 1)),
                 fill = "dark green") +
+    #add mean line 
     geom_line(aes(x = Date,
                   y = Tmean)) +
     theme_bw(base_size = 15) +
@@ -198,7 +205,7 @@ ggplot_PLS <- function(PLS_results)
   plot<- (VIP_plot +
             coeff_plot +
             temp_plot +
-            plot_layout(ncol=1,
+            plot_layout(ncol=1, #the layout 1 column
                         guides = "collect")
           ) & theme(legend.position = "right",
                     legend.text = element_text(size = 8),
@@ -207,5 +214,8 @@ ggplot_PLS <- function(PLS_results)
   
   plot}
 
-ggplot_PLS(PLS_results)
+
+#exercise: why is it still noisy. what we have to do for better output
+  #work with another datasets
+  #the chilling period in california not showing (grey), how we not see and what are we expected. 
 
